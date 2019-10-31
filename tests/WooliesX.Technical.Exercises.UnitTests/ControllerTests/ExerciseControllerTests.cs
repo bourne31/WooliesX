@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WooliesX.Technical.Exercises.Controllers;
+using WooliesX.Technical.Exercises.External.Contracts.Requests;
 using WooliesX.Technical.Exercises.Models;
 using WooliesX.Technical.Exercises.Services;
 using Xunit;
@@ -14,14 +15,16 @@ namespace WooliesX.Technical.Exercises.UnitTests.ControllerTests
     {
         private readonly IUserService _userService;
         private readonly IProductService _productService;
+        private readonly ITrolleyService _trolleyService;
         private readonly ExerciseController _controller;
 
         public ExerciseControllerTests()
         {
             _userService = Substitute.For<IUserService>();
             _productService = Substitute.For<IProductService>();
+            _trolleyService = Substitute.For<ITrolleyService>();
 
-            _controller = new ExerciseController(_userService, _productService);
+            _controller = new ExerciseController(_userService, _productService, _trolleyService);
         }
 
         [Fact]
@@ -78,6 +81,56 @@ namespace WooliesX.Technical.Exercises.UnitTests.ControllerTests
             Assert.Equal(productsResult.FirstOrDefault().Name, productsResult.FirstOrDefault().Name);
             Assert.Equal(productsResult.FirstOrDefault().Price, productsResult.FirstOrDefault().Price);
             Assert.Equal(productsResult.FirstOrDefault().Quantity, productsResult.FirstOrDefault().Quantity);
+        }
+
+        [Fact]
+        public async Task GetTrolleyTotal()
+        {
+            // Arrange
+            var trolleyRequest = new TrolleyRequest
+            {
+                Products = new List<ProductRequest>
+                {
+                    new ProductRequest
+                    {
+                        Name = "Test A",
+                        Price = 14
+                    }
+                },
+                Specials = new List<SpecialRequest>
+                {
+                    new SpecialRequest
+                    {
+                        Quantities = new List<QuantityRequest>
+                        {
+                            new QuantityRequest
+                            {
+                                Name = "Test B",
+                                Quantity = 1
+                            }
+                        }
+                    }
+                },
+                Quantities = new List<QuantityRequest>
+                {
+                    new QuantityRequest
+                    {
+                        Name = "Test C"
+                        ,Quantity = 1
+                    }
+                }
+            };
+            _trolleyService.GetTrolleyTotalAsync(trolleyRequest).Returns(Task.FromResult(14m));
+
+            // Act
+            var actionResult = await _controller.GetTrolleyTotal(trolleyRequest);
+
+            var result = actionResult.Result as OkObjectResult;
+            var total = (decimal)result.Value;
+
+            // Assert
+            Assert.IsAssignableFrom<decimal>(total);
+            Assert.Equal(14, total);
         }
     }
 }
