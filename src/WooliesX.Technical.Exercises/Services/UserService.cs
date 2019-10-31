@@ -10,6 +10,6 @@ namespace WooliesX.Technical.Exercises.Services
 
         }
 
-        public User GetUser() => new User { Name = "Roberto Suner", Token = new Guid().ToString() };
+        public User GetUser() => new User { Name = "Roberto Suner", Token = Guid.NewGuid().ToString() };
     }
 }

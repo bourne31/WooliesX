@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Refit;
+using System;
+using WooliesX.Technical.Exercises.External.Clients;
+using WooliesX.Technical.Exercises.Services;
 
 namespace WooliesX.Technical.Exercises
 {
@@ -26,6 +24,13 @@ namespace WooliesX.Technical.Exercises
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMvc().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IProductService, ProductService>();
+
+            services.AddRefitClient<IWolliesXApiClient>()
+                    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://dev-wooliesx-recruitment.azurewebsites.net"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -9,9 +9,15 @@ namespace WooliesX.Technical.Exercises.UnitTests.ControllerTests
     public class ExerciseControllerTests
     {
         private readonly IUserService _userService;
+        private readonly IProductService _productService;
+        private readonly ExerciseController _controller;
+
         public ExerciseControllerTests()
         {
             _userService = Substitute.For<IUserService>();
+            _productService = Substitute.For<IProductService>();
+
+            _controller = new ExerciseController(_userService, _productService);
         }
 
         [Fact]
@@ -21,10 +27,8 @@ namespace WooliesX.Technical.Exercises.UnitTests.ControllerTests
             var user = new User { Name = "Test", Token = "abc123" };
             _userService.GetUser().Returns(user);
 
-            var controller = new ExerciseController(_userService);
-
             // Act
-            var result = controller.Get();
+            var result = _controller.Get();
 
             // Assert
             Assert.IsAssignableFrom<User>(result.Value);
