@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Refit;
 using System;
 using WooliesX.Technical.Exercises.External.Clients;
+using WooliesX.Technical.Exercises.Models;
 using WooliesX.Technical.Exercises.Services;
 
 namespace WooliesX.Technical.Exercises
@@ -26,11 +28,19 @@ namespace WooliesX.Technical.Exercises
             services.AddControllers();
             services.AddMvc().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+
             services.AddTransient<IUserService, UserService>();
             services.AddTransient<IProductService, ProductService>();
+            services.AddTransient<ITrolleyService, TrolleyService>();
 
+#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+            var serviceProvider = services.BuildServiceProvider();
+#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
+
+            var options = serviceProvider.GetService<IOptions<AppSettings>>();
             services.AddRefitClient<IWolliesXApiClient>()
-                    .ConfigureHttpClient(c => c.BaseAddress = new Uri("http://dev-wooliesx-recruitment.azurewebsites.net"));
+                    .ConfigureHttpClient(c => c.BaseAddress = new Uri(options.Value.WooliesXApiUrl));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -11,8 +11,4 @@
     <PackageReference Include="Refit.HttpClientFactory" Version="4.8.14" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="External\Contracts\Requests\" />
-  </ItemGroup>
-
 </Project>

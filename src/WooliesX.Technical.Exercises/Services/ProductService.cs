@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WooliesX.Technical.Exercises.External.Clients;
@@ -10,24 +12,35 @@ namespace WooliesX.Technical.Exercises.Services
     public class ProductService : IProductService
     {
         private readonly IWolliesXApiClient _wolliesXApiClient;
+        private readonly AppSettings _appSettings;
 
-        public ProductService(IWolliesXApiClient wolliesXApiClient)
+        public ProductService(IWolliesXApiClient wolliesXApiClient,
+            IOptions<AppSettings> appSettings)
         {
             _wolliesXApiClient = wolliesXApiClient;
+            _appSettings = appSettings.Value;
         }
 
         public async Task<IEnumerable<Product>> GetProductsAsync(string sortOption)
         {
-            var response = await _wolliesXApiClient.GetProductsAsync("f04e63c3-7e44-436f-ac8a-1f07c49b38d8");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
+                var response = await _wolliesXApiClient.GetProductsAsync(_appSettings.Token);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var products = MapProducts(response.Content);
+
+                return await SortProducts(products, sortOption);
+            }
+            catch 
+            {
+                // Log Exception
                 return null;
             }
-
-            var products = MapProducts(response.Content);
-
-            return await SortProducts(products, sortOption);
         }
 
         private IEnumerable<Product> MapProducts(IEnumerable<ProductResponse> products)
@@ -52,9 +65,14 @@ namespace WooliesX.Technical.Exercises.Services
                 return products;
             }
 
-            if (sortOption.Equals("recommended", System.StringComparison.InvariantCultureIgnoreCase))
+            if (sortOption.Equals("recommended", StringComparison.InvariantCultureIgnoreCase))
             {
                 var recommendedProducts = await GetRecommendedProducts();
+                if (recommendedProducts == null)
+                {
+                    return products;
+                }
+
                 return products.OrderByDescending(x => recommendedProducts.Count(p => p.Name == x.Name));
             }
 
@@ -70,16 +88,24 @@ namespace WooliesX.Technical.Exercises.Services
 
         private async Task<IEnumerable<ProductResponse>> GetRecommendedProducts()
         {
-            var response = await _wolliesXApiClient.GetShopperHistoryAsync("f04e63c3-7e44-436f-ac8a-1f07c49b38d8");
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
+                var response = await _wolliesXApiClient.GetShopperHistoryAsync(_appSettings.Token);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                var products = response.Content.SelectMany(x => x.Products);
+
+                return products;
+            }
+            catch
+            {
+                // Log Exception
                 return null;
             }
-
-            var products = response.Content.SelectMany(x => x.Products);
-
-            return products;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WooliesX.Technical.Exercises.External.Contracts.Requests;
 using WooliesX.Technical.Exercises.External.Contracts.Responses;
 
 namespace WooliesX.Technical.Exercises.External.Clients
@@ -12,5 +13,8 @@ namespace WooliesX.Technical.Exercises.External.Clients
 
         [Get("/api/resource/shopperhistory")]
         Task<ApiResponse<IEnumerable<ShopperHistoryResponse>>> GetShopperHistoryAsync(string token);
+
+        [Post("/api/resource/trolleyCalculator")]
+        Task<ApiResponse<decimal>> GetTrolleyTotalAsync(string token, [Body] TrolleyRequest trolleyRequest);
     }
 }

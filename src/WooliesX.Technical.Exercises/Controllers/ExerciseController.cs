@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using WooliesX.Technical.Exercises.External.Contracts.Requests;
 using WooliesX.Technical.Exercises.Models;
 using WooliesX.Technical.Exercises.Services;
-
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WooliesX.Technical.Exercises.Controllers
 {
@@ -14,12 +13,15 @@ namespace WooliesX.Technical.Exercises.Controllers
     {
         private readonly IUserService _userService;
         private readonly IProductService _productService;
+        private readonly ITrolleyService _trolleyService;
 
         public ExerciseController(IUserService userService,
-            IProductService productService)
+            IProductService productService,
+            ITrolleyService trolleyService)
         {
             _userService = userService;
             _productService = productService;
+            _trolleyService = trolleyService;
         }
 
         public ActionResult<User> Get()
@@ -33,7 +35,7 @@ namespace WooliesX.Technical.Exercises.Controllers
             var user = _userService.GetUser();
             if (user == null)
             {
-                NotFound();
+                return NotFound();
             }
 
             return user;
@@ -42,13 +44,31 @@ namespace WooliesX.Technical.Exercises.Controllers
         [Route("sort")]
         public async Task<ActionResult<IEnumerable<Product>>> SortProducts(string sortOption)
         {
+            if (string.IsNullOrWhiteSpace(sortOption))
+            {
+                return BadRequest("SortOption parameter is required.");
+            }
+
             var products = await _productService.GetProductsAsync(sortOption);
             if (products == null)
             {
-                NotFound();
+                return NotFound();
             }
 
             return Ok(products);
+        }
+
+        [HttpPost]
+        [Route("trolleytotal")]
+        public async Task<ActionResult<decimal>> GetTrolleyTotal([FromBody] TrolleyRequest trolleyRequest)
+        {
+            var total = await _trolleyService.GetTrolleyTotalAsync(trolleyRequest);
+            if (total <= 0)
+            {
+                return BadRequest();
+            }
+
+            return Ok(total);
         }
     }
 }
