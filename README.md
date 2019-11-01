@@ -10,7 +10,8 @@ Exercise 3 : POST https://wooliesxtechnicalchallenge.azurewebsites.net/api/exerc
     {
       "name": "test",
       "price": 11
-    }],"specials": [
+    }],
+    "specials": [
     {
       "quantities": [
         {
@@ -19,13 +20,15 @@ Exercise 3 : POST https://wooliesxtechnicalchallenge.azurewebsites.net/api/exerc
         }
       ],
       "total": 15
-    }],"quantities": [
+    }],
+    "quantities": [
     {
       "name": "test",
       "quantity": 3
+    }]
     }
-  ]
-}
+
+
   
   
   
