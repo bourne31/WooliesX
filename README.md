@@ -6,8 +6,7 @@ Exercise 2 : GET https://wooliesxtechnicalchallenge.azurewebsites.net/api/exerci
 
 Exercise 3 : POST https://wooliesxtechnicalchallenge.azurewebsites.net/api/exercise/trolleytotal
             
-             Sample BODY: {
-  "products": [
+             Sample BODY: "products": [
     {
       "name": "test",
       "price": 11
@@ -31,4 +30,5 @@ Exercise 3 : POST https://wooliesxtechnicalchallenge.azurewebsites.net/api/exerc
     }
   ]
 }
+  
 
